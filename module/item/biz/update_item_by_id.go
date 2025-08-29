@@ -2,6 +2,7 @@ package biz
 
 import (
 	"context"
+	"g09/common"
 	"g09/module/item/model"
 )
 
@@ -22,7 +23,7 @@ func NewUpdateItemBiz(store UpdateItemStore) *updateItemBiz {
 func (biz *updateItemBiz) UpdateItemById(ctx context.Context, id int, dataUpdate *model.TodoItemUpdate) error {
 	data, err := biz.store.GetItem(ctx, map[string]interface{}{"id": id})
 	if err != nil {
-		return err
+		return common.ErrCannotGetEntity(model.EntityName, err)
 	}
 
 	if data.Status == "Deleted" {
@@ -30,7 +31,7 @@ func (biz *updateItemBiz) UpdateItemById(ctx context.Context, id int, dataUpdate
 	}
 
 	if err := biz.store.UpdateItem(ctx, map[string]interface{}{"id": id}, dataUpdate); err != nil {
-		return err
+		return common.ErrCannotUpdateEntity(model.EntityName, err)
 	}
 	return nil
 }

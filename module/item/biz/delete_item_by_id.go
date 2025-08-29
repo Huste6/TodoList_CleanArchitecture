@@ -2,6 +2,7 @@ package biz
 
 import (
 	"context"
+	"g09/common"
 	"g09/module/item/model"
 )
 
@@ -22,14 +23,14 @@ func NewDeleteItemBiz(store DeleteItemStore) *deleteItemBiz {
 func (biz *deleteItemBiz) DeleteItemById(ctx context.Context, id int) error {
 	data, err := biz.store.GetItem(ctx, map[string]interface{}{"id": id})
 	if err != nil {
-		return err
+		return common.ErrCannotGetEntity(model.EntityName, err)
 	}
 	if data.Status == "Deleted" {
 		return model.ErrItemIsDeleted
 	}
 
 	if err := biz.store.DeleteItem(ctx, map[string]interface{}{"id": id}); err != nil {
-		return err
+		return common.ErrCannotDeleteEntity(model.EntityName, err)
 	}
 	return nil
 }
@@ -38,7 +39,7 @@ func (biz *deleteItemBiz) DeleteItemsByIds(ctx context.Context, ids []int) error
 	for _, id := range ids {
 		item, err := biz.store.GetItem(ctx, map[string]interface{}{"id": id})
 		if err != nil {
-			return err
+			return common.ErrCannotGetEntity(model.EntityName, err)
 		}
 		if item.Status == "Deleted" {
 			return model.ErrItemIsDeleted

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"g09/middleware"
 	ginitem "g09/module/item/transport/gin"
 	"log"
 	"net/http"
@@ -20,7 +21,7 @@ func main() {
 	log.Println("DB connection: ", db)
 	/////////////////////////
 	r := gin.Default()
-
+	r.Use(middleware.Recover())
 	v1 := r.Group("/v1")
 	{
 		items := v1.Group("/items")
