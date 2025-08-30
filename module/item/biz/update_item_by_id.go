@@ -10,6 +10,7 @@ type UpdateItemStore interface {
 	GetItem(ctx context.Context, cond map[string]interface{}) (*model.TodoItem, error)
 	UpdateItem(ctx context.Context, cond map[string]interface{}, dataUpdate *model.TodoItemUpdate) error
 	UpdateItems(ctx context.Context, ids []int, status string) error
+	DeleteItemImage(ctx context.Context, itemId int) error
 }
 
 type updateItemBiz struct {
@@ -48,6 +49,23 @@ func (biz *updateItemBiz) UpdateItemsStatus(ctx context.Context, ids []int, stat
 	}
 	if err := biz.store.UpdateItems(ctx, ids, status); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (biz *updateItemBiz) DeleteItemImage(ctx context.Context, id int) error {
+	data, err := biz.store.GetItem(ctx, map[string]interface{}{"id": id})
+	if err != nil {
+		return common.ErrCannotGetEntity(model.EntityName, err)
+	}
+
+	if data.Status == "Deleted" {
+		return model.ErrItemIsDeleted
+	}
+
+	if err := biz.store.DeleteItemImage(ctx, id); err != nil {
+		return common.ErrCannotUpdateEntity(model.EntityName, err)
 	}
 
 	return nil

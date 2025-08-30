@@ -3,15 +3,21 @@ package main
 import (
 	"g09/middleware"
 	ginitem "g09/module/item/transport/gin"
+	"g09/module/upload/transport/ginupload"
 	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
 func main() {
+	err := godotenv.Load(".env.local")
+	if err != nil {
+		log.Println("Warning: .env.local file not found")
+	}
 	dsn := "root:my-secret-pw@tcp(127.0.0.1:3306)/social-todo-list?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
@@ -19,20 +25,28 @@ func main() {
 	}
 	db = db.Debug()
 	log.Println("DB connection: ", db)
-	/////////////////////////
+
 	r := gin.Default()
 	r.Use(middleware.Recover())
+	r.Static("/static", "./static")
+
 	v1 := r.Group("/v1")
 	{
 		items := v1.Group("/items")
 		{
 			items.POST("", ginitem.CreateItem(db))
+			items.POST("/:id/upload", ginupload.UploadAndAttachToItem(db))
 			items.GET("", ginitem.GetAllItem(db))
 			items.GET("/:id", ginitem.GetItem(db))
 			items.PATCH("/:id", ginitem.UpdateItem(db))
 			items.PATCH("/status", ginitem.UpdateItems(db))
 			items.DELETE("/:id", ginitem.DeleteItem(db))
 			items.DELETE("", ginitem.DeleteItems(db))
+			items.DELETE("/:id/image", ginupload.DeleteItemImage(db))
+		}
+		items = v1.Group("/upload")
+		{
+			items.POST("", ginupload.Upload(db))
 		}
 	}
 

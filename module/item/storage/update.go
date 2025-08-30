@@ -13,6 +13,13 @@ func (s *sqlStore) UpdateItem(ctx context.Context, cond map[string]interface{}, 
 	return nil
 }
 
+func (s *sqlStore) DeleteItemImage(ctx context.Context, itemId int) error {
+	if err := s.db.Model(&model.TodoItem{}).Where("id = ?", itemId).Update("image", nil).Error; err != nil {
+		return common.ErrDB(err)
+	}
+	return nil
+}
+
 func (s *sqlStore) UpdateItems(ctx context.Context, ids []int, status string) error {
 	if err := s.db.Table(model.TodoItemUpdate{}.TableName()).Where("ID in ?", ids).Updates(map[string]interface{}{"status": status}).Error; err != nil {
 		return common.ErrDB(err)
