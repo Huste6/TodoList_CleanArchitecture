@@ -33,7 +33,7 @@ func GetItem(db *gorm.DB) func(ctx *gin.Context) {
 			c.JSON(http.StatusBadRequest, err)
 			return
 		}
-
+		data.Mask()
 		c.JSON(http.StatusOK, common.SimpleSuccessResponse(data))
 	}
 }

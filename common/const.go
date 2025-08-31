@@ -6,6 +6,13 @@ const (
 	CurrentUser = "current_user"
 )
 
+type DbType int
+
+const (
+	DbTypeItem DbType = 1
+	DbTypeUser DbType = 2
+)
+
 func Recover() {
 	if r := recover(); r != nil {
 		fmt.Println("Recovered: ", r)

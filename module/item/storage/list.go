@@ -26,6 +26,10 @@ func (s *sqlStore) ListItem(ctx context.Context, filter *model.Filter, paging *c
 		return nil, err
 	}
 
+	for i := range moreKeys {
+		db = db.Preload(moreKeys[i])
+	}
+
 	if err := db.
 		Select("*").
 		Offset((paging.Page - 1) * paging.Limit).

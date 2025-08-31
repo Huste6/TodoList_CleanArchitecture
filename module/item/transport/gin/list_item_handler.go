@@ -38,6 +38,9 @@ func GetAllItem(db *gorm.DB) func(ctx *gin.Context) {
 			})
 			return
 		}
+		for i := range res {
+			res[i].Mask()
+		}
 		c.JSON(http.StatusOK, common.NewSuccessResponse(res, queryString.Paging, queryString.Filter))
 	}
 }

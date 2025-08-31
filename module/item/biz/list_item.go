@@ -21,7 +21,7 @@ func NewListItemBiz(store ListItemStorage, requester common.Requester) *listItem
 
 func (biz *listItemBiz) ListItem(ctx context.Context, filter *model.Filter, paging *common.Paging) ([]model.TodoItem, error) {
 	// ctxStore := context.WithValue(ctx, common.CurrentUser, biz.requester)
-	data, err := biz.store.ListItem(ctx, filter, paging)
+	data, err := biz.store.ListItem(ctx, filter, paging, "Owner")
 	if err != nil {
 		return nil, common.ErrCannotListEntity(model.EntityName, err)
 	}
