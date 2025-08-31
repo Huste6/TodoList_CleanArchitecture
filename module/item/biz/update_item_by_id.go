@@ -2,6 +2,7 @@ package biz
 
 import (
 	"context"
+	"errors"
 	"g09/common"
 	"g09/module/item/model"
 )
@@ -14,11 +15,12 @@ type UpdateItemStore interface {
 }
 
 type updateItemBiz struct {
-	store UpdateItemStore
+	store     UpdateItemStore
+	requester common.Requester
 }
 
-func NewUpdateItemBiz(store UpdateItemStore) *updateItemBiz {
-	return &updateItemBiz{store: store}
+func NewUpdateItemBiz(store UpdateItemStore, requester common.Requester) *updateItemBiz {
+	return &updateItemBiz{store: store, requester: requester}
 }
 
 func (biz *updateItemBiz) UpdateItemById(ctx context.Context, id int, dataUpdate *model.TodoItemUpdate) error {
@@ -29,6 +31,12 @@ func (biz *updateItemBiz) UpdateItemById(ctx context.Context, id int, dataUpdate
 
 	if data.Status == "Deleted" {
 		return model.ErrItemIsDeleted
+	}
+
+	isOwner := biz.requester.GetUserId() == data.UserId
+
+	if !isOwner && !common.IsAdmin(biz.requester) {
+		return common.ErrNoPermission(errors.New("no permission"))
 	}
 
 	if err := biz.store.UpdateItem(ctx, map[string]interface{}{"id": id}, dataUpdate); err != nil {

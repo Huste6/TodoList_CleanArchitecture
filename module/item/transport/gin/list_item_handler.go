@@ -26,10 +26,10 @@ func GetAllItem(db *gorm.DB) func(ctx *gin.Context) {
 		}
 		queryString.Paging.Process()
 
-		var res []model.TodoItem
+		requester := c.MustGet(common.CurrentUser).(common.Requester)
 
 		store := storage.NewSQLStore(db)
-		business := biz.NewListItemBiz(store)
+		business := biz.NewListItemBiz(store, requester)
 
 		res, err := business.ListItem(c.Request.Context(), &queryString.Filter, &queryString.Paging)
 		if err != nil {

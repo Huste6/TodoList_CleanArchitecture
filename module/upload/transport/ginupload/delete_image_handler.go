@@ -40,7 +40,9 @@ func DeleteItemImage(db *gorm.DB) func(*gin.Context) {
 		oldImageURL := item.Image.Url
 
 		// Xóa image từ database bằng business layer
-		itemBiz := biz.NewUpdateItemBiz(itemStore)
+		requester := c.MustGet(common.CurrentUser).(common.Requester)
+
+		itemBiz := biz.NewUpdateItemBiz(itemStore, requester)
 
 		if err := itemBiz.DeleteItemImage(c.Request.Context(), itemId); err != nil {
 			if appErr, ok := err.(*common.AppError); ok {

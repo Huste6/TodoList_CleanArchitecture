@@ -10,6 +10,12 @@ func (s *sqlStore) ListItem(ctx context.Context, filter *model.Filter, paging *c
 	var res []model.TodoItem
 
 	db := s.db.Table(model.TodoItem{}.TableName()).Where("status <> ?", "Deleted")
+
+	// Dùng để lấy ra các todolist của user đấy
+	// requester := ctx.Value(common.CurrentUser).(common.Requester)
+
+	// db = db.Where("user_id = ?", requester.GetUserId())
+
 	if f := filter; f != nil {
 		if v := f.Status; v != "" {
 			db = db.Where("status = ?", v)

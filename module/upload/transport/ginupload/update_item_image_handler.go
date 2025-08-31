@@ -54,7 +54,9 @@ func UploadAndAttachToItem(db *gorm.DB) func(*gin.Context) {
 		}
 
 		// Gán ảnh mới cho item
-		itemBiz := biz.NewUpdateItemBiz(itemStore)
+		requester := c.MustGet(common.CurrentUser).(common.Requester)
+
+		itemBiz := biz.NewUpdateItemBiz(itemStore, requester)
 		updateData := &model.TodoItemUpdate{Image: img}
 
 		if err := itemBiz.UpdateItemById(c.Request.Context(), itemId, updateData); err != nil {

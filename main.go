@@ -1,11 +1,15 @@
 package main
 
 import (
+	"g09/component/tokenprovider/jwt"
 	"g09/middleware"
 	ginitem "g09/module/item/transport/gin"
 	"g09/module/upload/transport/ginupload"
+	"g09/module/user/storage"
+	ginuser "g09/module/user/transport/gin"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -18,6 +22,8 @@ func main() {
 	if err != nil {
 		log.Println("Warning: .env.local file not found")
 	}
+
+	systemSecret := os.Getenv("SECRET")
 	dsn := "root:my-secret-pw@tcp(127.0.0.1:3306)/social-todo-list?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
@@ -26,13 +32,20 @@ func main() {
 	db = db.Debug()
 	log.Println("DB connection: ", db)
 
+	authStore := storage.NewSQLStore(db)
+	tokenProvider := jwt.NewTokenJWTProvider(systemSecret, "jwt")
+	middlewareAuth := middleware.RequiredAuth(authStore, tokenProvider)
+
 	r := gin.Default()
 	r.Use(middleware.Recover())
 	r.Static("/static", "./static")
 
 	v1 := r.Group("/v1")
 	{
-		items := v1.Group("/items")
+		v1.POST("/register", ginuser.Register(db))
+		v1.POST("/login", ginuser.Login(db, tokenProvider))
+		v1.GET("/profile", middlewareAuth, ginuser.Profile())
+		items := v1.Group("/items", middlewareAuth)
 		{
 			items.POST("", ginitem.CreateItem(db))
 			items.POST("/:id/upload", ginupload.UploadAndAttachToItem(db))
