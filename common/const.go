@@ -13,6 +13,10 @@ const (
 	DbTypeUser DbType = 2
 )
 
+const (
+	PluginDBMain = "mysql"
+)
+
 func Recover() {
 	if r := recover(); r != nil {
 		fmt.Println("Recovered: ", r)
