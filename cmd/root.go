@@ -9,6 +9,7 @@ import (
 	"g09/module/upload/transport/ginupload"
 	userstorage "g09/module/user/storage"
 	ginuser "g09/module/user/transport/gin"
+	ginuserlikeitem "g09/module/userlikeitem/transport/gin"
 	"net/http"
 	"os"
 
@@ -65,6 +66,10 @@ var rootCmd = &cobra.Command{
 					items.DELETE("/:id", ginitem.DeleteItem(db))
 					items.DELETE("", ginitem.DeleteItems(db))
 					items.DELETE("/:id/image", ginupload.DeleteItemImage(db))
+
+					items.POST("/:id/like", ginuserlikeitem.LikeItem(service))
+					items.DELETE("/:id/unlike", ginuserlikeitem.UnlikeItem(service))
+					items.GET("/:id/liked_users", ginuserlikeitem.ListItem(service))
 				}
 				items = v1.Group("/upload")
 				{
