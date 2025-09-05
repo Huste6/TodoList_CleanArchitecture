@@ -6,20 +6,20 @@ import (
 	"g09/module/item/model"
 )
 
-type ListItemStorage interface {
+type ListItemRepo interface {
 	ListItem(ctx context.Context, filter *model.Filter, paging *common.Paging, moreKeys ...string) ([]model.TodoItem, error)
 }
 
 type listItemBiz struct {
-	store     ListItemStorage
+	store     ListItemRepo
 	requester common.Requester
 }
 
-func NewListItemBiz(store ListItemStorage, requester common.Requester) *listItemBiz {
+func NewListItemBiz(store ListItemRepo, requester common.Requester) *listItemBiz {
 	return &listItemBiz{store: store, requester: requester}
 }
 
-func (biz *listItemBiz) ListItem(ctx context.Context, filter *model.Filter, paging *common.Paging) ([]model.TodoItem, error) {
+func (biz *listItemBiz) ListItem(ctx context.Context, filter *model.Filter, paging *common.Paging, moreKeys ...string) ([]model.TodoItem, error) {
 	// ctxStore := context.WithValue(ctx, common.CurrentUser, biz.requester)
 	data, err := biz.store.ListItem(ctx, filter, paging, "Owner")
 	if err != nil {

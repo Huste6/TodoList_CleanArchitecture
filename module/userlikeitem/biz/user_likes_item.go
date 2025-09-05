@@ -2,24 +2,38 @@ package biz
 
 import (
 	"context"
+	"g09/common"
 	"g09/module/userlikeitem/model"
+	"log"
 )
 
 type UserLikeItemStore interface {
 	Create(ctx context.Context, data *model.Like) error
 }
 
+type IncreaseItemStorage interface {
+	IncreaseLikeCount(ctx context.Context, id int) error
+}
 type userLikeItemBiz struct {
-	store UserLikeItemStore
+	store     UserLikeItemStore
+	itemStore IncreaseItemStorage
 }
 
-func NewUserLikeItemBiz(store UserLikeItemStore) *userLikeItemBiz {
-	return &userLikeItemBiz{store: store}
+func NewUserLikeItemBiz(store UserLikeItemStore, itemStore IncreaseItemStorage) *userLikeItemBiz {
+	return &userLikeItemBiz{store: store, itemStore: itemStore}
 }
 
 func (biz *userLikeItemBiz) LikeItem(ctx context.Context, data *model.Like) error {
 	if err := biz.store.Create(ctx, data); err != nil {
 		return model.ErrCannotLikeItem(err)
 	}
+
+	go func() {
+		defer common.Recover()
+		if err := biz.itemStore.IncreaseLikeCount(ctx, data.ItemId); err != nil {
+			log.Println(err.Error())
+		}
+	}()
+
 	return nil
 }

@@ -4,11 +4,12 @@ import (
 	"g09/common"
 	"g09/module/item/biz"
 	"g09/module/item/model"
+	"g09/module/item/repository"
 	"g09/module/item/storage"
-	"net/http"
-
+	usrLikeStore "g09/module/userlikeitem/storage"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"net/http"
 )
 
 func GetAllItem(db *gorm.DB) func(ctx *gin.Context) {
@@ -29,7 +30,9 @@ func GetAllItem(db *gorm.DB) func(ctx *gin.Context) {
 		requester := c.MustGet(common.CurrentUser).(common.Requester)
 
 		store := storage.NewSQLStore(db)
-		business := biz.NewListItemBiz(store, requester)
+		likeStore := usrLikeStore.NewSQLStore(db)
+		repo := repository.NewListItemRepo(store, likeStore, requester)
+		business := biz.NewListItemBiz(repo, requester)
 
 		res, err := business.ListItem(c.Request.Context(), &queryString.Filter, &queryString.Paging)
 		if err != nil {
