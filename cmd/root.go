@@ -10,6 +10,8 @@ import (
 	userstorage "g09/module/user/storage"
 	ginuser "g09/module/user/transport/gin"
 	ginuserlikeitem "g09/module/userlikeitem/transport/gin"
+	"g09/pubsub"
+	"g09/subscriber"
 	"net/http"
 	"os"
 
@@ -25,6 +27,7 @@ func newService() goservice.Service {
 		goservice.WithName("social-todo-list"),
 		goservice.WithVersion("1.0.0"),
 		goservice.WithInitRunnable(sdkgorm.NewGormDB("main", common.PluginDBMain)),
+		goservice.WithInitRunnable(pubsub.NewPubSub(common.PluginPubSub)),
 	)
 	return service
 }
@@ -83,6 +86,8 @@ var rootCmd = &cobra.Command{
 				})
 			})
 		})
+
+		_ = subscriber.NewEngine(service).Start()
 
 		if err := service.Start(); err != nil {
 			serviceLogger.Fatalln(err)

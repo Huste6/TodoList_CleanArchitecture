@@ -2,7 +2,6 @@ package storage
 
 import (
 	"context"
-	"errors"
 	"g09/common"
 	"g09/module/item/model"
 
@@ -42,13 +41,6 @@ func (s *sqlStore) IncreaseLikeCount(ctx context.Context, id int) error {
 func (s *sqlStore) DecreaseLikeCount(ctx context.Context, id int) error {
 	db := s.db.Table(model.TodoItem{}.TableName())
 
-	var item model.TodoItem
-	if err := db.Where("id = ?", id).First(&item).Error; err != nil {
-		return common.ErrDB(err)
-	}
-	if item.LikedCount <= 0 {
-		return common.ErrInvalidRequest(errors.New("like count must be greater than 0"))
-	}
 	if err := db.Where("id = ?", id).Update("like_count", gorm.Expr("like_count - ?", 1)).Error; err != nil {
 		return common.ErrDB(err)
 	}
