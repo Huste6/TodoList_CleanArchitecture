@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"g09/common"
+	"g09/component/rpccaller"
 	"g09/component/tokenprovider/jwt"
 	"g09/middleware"
 	ginitem "g09/module/item/transport/gin"
@@ -28,6 +29,7 @@ func newService() goservice.Service {
 		goservice.WithVersion("1.0.0"),
 		goservice.WithInitRunnable(sdkgorm.NewGormDB("main", common.PluginDBMain)),
 		goservice.WithInitRunnable(pubsub.NewPubSub(common.PluginPubSub)),
+		goservice.WithInitRunnable(rpccaller.NewApiItemCaller(common.PluginApiItem)),
 	)
 	return service
 }
@@ -62,7 +64,7 @@ var rootCmd = &cobra.Command{
 				{
 					items.POST("", ginitem.CreateItem(db))
 					items.POST("/:id/upload", ginupload.UploadAndAttachToItem(db))
-					items.GET("", ginitem.GetAllItem(db))
+					items.GET("", ginitem.GetAllItem(service))
 					items.GET("/:id", ginitem.GetItem(db))
 					items.PATCH("/:id", ginitem.UpdateItem(db))
 					items.PATCH("/status", ginitem.UpdateItems(db))
@@ -74,6 +76,12 @@ var rootCmd = &cobra.Command{
 					items.DELETE("/:id/unlike", ginuserlikeitem.UnlikeItem(service))
 					items.GET("/:id/liked_users", ginuserlikeitem.ListItem(service))
 				}
+
+				rpc := v1.Group("rpc")
+				{
+					rpc.POST("/get_item_likes", ginuserlikeitem.GetItemLikes(service))
+				}
+
 				items = v1.Group("/upload")
 				{
 					items.POST("", ginupload.Upload(db))

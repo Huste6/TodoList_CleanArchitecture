@@ -14,8 +14,9 @@ const (
 )
 
 const (
-	PluginDBMain = "mysql"
-	PluginPubSub = "pubsub"
+	PluginDBMain  = "mysql"
+	PluginPubSub  = "pubsub"
+	PluginApiItem = "item-api"
 
 	TopicUserLikedItem   = "TopicUserLikedItem"
 	TopicUserUnLikedItem = "TopicUserUnLikedItem"
